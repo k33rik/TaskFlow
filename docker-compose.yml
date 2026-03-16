@@ -1,0 +1,39 @@
+services:
+  web:
+    container_name: ${APP_NAME}-web
+    image: nginx:1.29
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www/${APP_NAME}
+    ports:
+      - '80:80'
+
+  app:
+    container_name: ${APP_NAME}-app
+    build: ./docker/php
+    working_dir: /var/www/${APP_NAME}
+    volumes:
+      - ./:/var/www/${APP_NAME}
+    user: '1000:1000'
+    environment:
+      HOME: /var/www/task-flow
+      XDG_CONFIG_HOME: /var/www/task-flow/.config
+
+  db:
+    container_name: ${APP_NAME}-db
+    image: postgres:17.6
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./docker/database/postgresql:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  mail:
+    container_name: ${APP_NAME}-mail
+    image: axllent/mailpit:v1.28.0
+    ports:
+        - '8025:8025'
+        - '1025:1025'
